@@ -13,3 +13,5 @@ In order to run the code (Instructions for linux):
   scala> import main.scala.Master
   scala> Master.main(Array())
   ```
+
+![alt tag](https://raw.githubusercontent.com/ahamshubham/scala-speech/blob/master/docs/scala-speech.png)

@@ -3,7 +3,7 @@ package main.scala
 /*
  Created by Shubham Bajpai on 7/12/16.
 */
-import java.awt.{Dimension, Graphics2D}
+import java.awt.{Color, Dimension, Graphics2D}
 import java.util.concurrent.LinkedBlockingQueue
 
 import scala.collection.mutable.Queue
@@ -85,14 +85,21 @@ class DrawingClass extends SimpleSwingApplication {
   }
 }
 
-//Panel to display the audio signal
+//Panel to plot the audio signal
 class DataPanel() extends Panel {
 
   private var audioInfoList = List(0.0)
 
+  //Set color for background
+  background = Color.WHITE
+
   //Plots the audio signal
   override def paintComponent(g: Graphics2D) {
     super.paintComponent(g)
+
+    //Set color for plotting
+    g.setColor(new Color(29,176,249))
+
     val mid_y = (g.getClipBounds.height.toFloat)/2
     var x2 = 1
     var prev_point = 0.0

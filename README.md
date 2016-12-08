@@ -14,4 +14,4 @@ In order to run the code (Instructions for linux):
   scala> Master.main(Array())
   ```
 
-[[https://github.com/ahamshubham/scala-speech/blob/master/docs/scala-speech.png]]
+![alt tag](https://github.com/ahamshubham/scala-speech/blob/master/docs/scala-speech.png)

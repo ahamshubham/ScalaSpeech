@@ -1,8 +1,8 @@
-package main.scala
-
 /*
  Created by Shubham Bajpai on 7/12/16.
 */
+package main.scala
+
 import java.awt.{Color, Dimension, Graphics2D}
 import java.util.concurrent.LinkedBlockingQueue
 

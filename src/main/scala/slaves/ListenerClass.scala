@@ -22,6 +22,7 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
 
   def run() {
     try {
+
       val format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian)
 
       //Audio Capture Device
@@ -29,24 +30,38 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
 
       try {
         val targetLine = AudioSystem.getLine(targetInfo).asInstanceOf[TargetDataLine]
+        println("Reached")
+        targetLine.flush()
         targetLine.open(format)
         targetLine.start()
-
 
         var numberOfBytesRead = 0
         //val numberOfBytesToRead = 3200
         val numberOfBytesToRead = targetLine.getBufferSize() / 5
         var audioInformationInBytes = new Array[Byte](numberOfBytesToRead)
+        var send_audio_thread: Thread = null
+        var start_time = System.currentTimeMillis()
+
+        targetLine.flush()
 
         while (numberOfBytesRead != -1) {
+          println(System.currentTimeMillis() - start_time)
+          start_time = System.currentTimeMillis()
           numberOfBytesRead = targetLine.read(audioInformationInBytes, 0, numberOfBytesToRead)
+          targetLine.flush()
 
-          //Convert audio information from byte notation to integer notation
-          val audioInformation = audioDecoder(audioInformationInBytes)
-          for (sample <- audioInformation) {
-            sharedQueue1.put(sample)
-            sharedQueue2.put(sample)
+          send_audio_thread = new Thread(new Runnable {
+            def run() {
+              send_audio_info(audioInformationInBytes)
+            }
+          })
+
+          send_audio_thread.start()
+
+          while(System.currentTimeMillis() - start_time < 10) {
+            val i = 10
           }
+
         }
       }
       catch {
@@ -55,6 +70,15 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
 
     } catch {
       case ex: InterruptedException => println("Interrupted Exception")
+    }
+  }
+
+  def send_audio_info(audioInformationInBytes: Array[Byte]) = {
+    val audioInformation = audioDecoder(audioInformationInBytes)
+    //println(audioInformation.toList)
+    for (sample <- audioInformation) {
+      sharedQueue1.put(sample)
+      sharedQueue2.put(sample)
     }
   }
 

@@ -1,7 +1,6 @@
 /*
 Created by Shubham Bajpai on 30/11/16.
 */
-
 package main.scala
 
 import java.util.concurrent.LinkedBlockingQueue
@@ -9,13 +8,12 @@ import main.scala.slaves._
 
 object Master {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]):Unit = {
 
     val numberOfQueues: Int = 2
 
     //Creating a list of shared queues
     val sharedQueue: List[LinkedBlockingQueue[Double]] = List.fill(numberOfQueues)(new LinkedBlockingQueue())
-
 
     //Creating threads
     val listenerThread = new Thread(new ListenerClass(sharedQueue(0),sharedQueue(1)))

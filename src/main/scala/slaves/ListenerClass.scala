@@ -8,12 +8,12 @@ import java.util.concurrent.LinkedBlockingQueue
 import javax.sound.sampled._
 import scala.util.control._
 
-
-class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQueue[Double]) extends Runnable {
+class ListenerClass(queue1: LinkedBlockingQueue[Double], queue2: LinkedBlockingQueue[Double], queue3: LinkedBlockingQueue[Double]) extends Runnable {
 
   //Audio Settings
   private val sharedQueue1 = queue1
   private val sharedQueue2 = queue2
+  private val sharedQueue3 = queue3
   private val sampleRate = 16000
   private val sampleSizeInBits = 16
   private val channels = 1
@@ -27,7 +27,8 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
 
       //Audio Capture Device
       val targetInfo = new DataLine.Info(classOf[TargetDataLine], format)
-
+      //Audio Output Device
+      val sourceInfo = new DataLine.Info(classOf[SourceDataLine], format)
       try {
         val targetLine = AudioSystem.getLine(targetInfo).asInstanceOf[TargetDataLine]
         println("Reached")
@@ -42,13 +43,18 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
         var send_audio_thread: Thread = null
         var start_time = System.currentTimeMillis()
 
+        val sourceLine = AudioSystem.getLine(sourceInfo).asInstanceOf[SourceDataLine]
+        sourceLine.open(format)
+        sourceLine.start()
+
         targetLine.flush()
 
         while (numberOfBytesRead != -1) {
-          println(System.currentTimeMillis() - start_time)
+          //println(System.currentTimeMillis() - start_time)
           start_time = System.currentTimeMillis()
           numberOfBytesRead = targetLine.read(audioInformationInBytes, 0, numberOfBytesToRead)
           targetLine.flush()
+          sourceLine.write(audioInformationInBytes, 0, numberOfBytesRead)
 
           send_audio_thread = new Thread(new Runnable {
             def run() {
@@ -58,10 +64,9 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
 
           send_audio_thread.start()
 
-          while(System.currentTimeMillis() - start_time < 10) {
+          while (System.currentTimeMillis() - start_time < 10) {
             val i = 10
           }
-
         }
       }
       catch {
@@ -79,46 +84,38 @@ class ListenerClass (queue1: LinkedBlockingQueue[Double],queue2: LinkedBlockingQ
     for (sample <- audioInformation) {
       sharedQueue1.put(sample)
       sharedQueue2.put(sample)
+      sharedQueue3.put(sample)
     }
   }
 
-  def audioDecoder(audioInformationInBytes: Array[Byte]):Array[Double] = {
+  def audioDecoder(audioInformationInBytes: Array[Byte]): Array[Double] = {
     val numberOfBytes = audioInformationInBytes.length
-    val bytesPerSample = sampleSizeInBits/8
-    val amplification = 100.0  //Choose a number of your choice
-    val micBufferData = new Array[Double](numberOfBytes - bytesPerSample +1)
-
+    val bytesPerSample = sampleSizeInBits / 8
+    val amplification = 100.0 //Choose a number of your choice
+    val micBufferData = new Array[Double](numberOfBytes - bytesPerSample + 1)
     var index1 = 0
     var index2 = 0
-
     val loop = new Breaks
-
-    loop.breakable
-    {
+    loop.breakable {
       while (true) {
         if (index1 > numberOfBytes - bytesPerSample)
           loop.break
         var sample: Double = 0.0
-
         for (index3: Int <- 0 to bytesPerSample - 1) {
           var temp1: Int = audioInformationInBytes(index1 + index3)
-
           if (index3 < bytesPerSample - 1 || bytesPerSample == 1) {
             temp1 = temp1 & 0xff
           }
-
           sample += (temp1 << (index3 * 8))
         }
 
         val converted_sample = amplification * (sample / 32768.0)
         //println(converted_sample)
         micBufferData(index2) = converted_sample
-
         index1 = index1 + bytesPerSample
         index2 = index2 + 1
       }
     }
-
-      return micBufferData
+    return micBufferData
   }
 }

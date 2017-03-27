@@ -4,7 +4,8 @@ Created by Shubham Bajpai on 30/11/16.
 package main.scala
 
 import java.util.concurrent.LinkedBlockingQueue
-import main.scala.slaves._
+
+import slaves._
 
 object Master {
 
@@ -13,17 +14,23 @@ object Master {
     val numberOfQueues: Int = 2
 
     //Creating a list of shared queues
-    val sharedQueue: List[LinkedBlockingQueue[Double]] = List.fill(numberOfQueues)(new LinkedBlockingQueue())
+    val sharedQueues: Map[String,LinkedBlockingQueue[Double]] = Map(
+      "listener-summer" -> new LinkedBlockingQueue(),
+      "listener-plotter" -> new LinkedBlockingQueue(),
+      "listener-recorder" -> new LinkedBlockingQueue()
+    )
 
     //Creating threads
-    val listenerThread = new Thread(new ListenerClass(sharedQueue(0),sharedQueue(1)))
-    val summerThread = new Thread(new SummerClass(sharedQueue(0)))
-    val plotterThread = new Thread(new RealTimeAudioPlotterClass(sharedQueue(1)))
+    val listenerThread = new Thread(new ListenerClass(sharedQueues("listener-summer"),sharedQueues("listener-plotter"),sharedQueues("listener-recorder")))
+    val summerThread = new Thread(new SummerClass(sharedQueues("listener-summer")))
+    val plotterThread = new Thread(new RealTimeAudioPlotterClass(sharedQueues("listener-plotter")))
+    val recorderThread = new Thread(new RecorderClass(sharedQueues("listener-recorder")))
 
     //Starting threads
     listenerThread.start()
     summerThread.start()
     plotterThread.start()
+    recorderThread.start()
   }
 
 }

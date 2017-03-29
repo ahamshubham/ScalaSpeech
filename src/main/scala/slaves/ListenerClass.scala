@@ -53,7 +53,6 @@ class ListenerClass(queue1: LinkedBlockingQueue[Double], queue2: LinkedBlockingQ
           //println(System.currentTimeMillis() - start_time)
           start_time = System.currentTimeMillis()
           numberOfBytesRead = targetLine.read(audioInformationInBytes, 0, numberOfBytesToRead)
-          targetLine.flush()
           sourceLine.write(audioInformationInBytes, 0, numberOfBytesRead)
 
           send_audio_thread = new Thread(new Runnable {

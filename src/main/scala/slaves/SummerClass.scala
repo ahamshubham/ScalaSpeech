@@ -25,7 +25,6 @@ class SummerClass(queue: LinkedBlockingQueue[Double]) extends Runnable {
             break
         }
         val resultFromProcessor = summer(input_data_list_buffer.toList)
-        println(resultFromProcessor)
       } catch {
         case ex: InterruptedException => println("Interrupted Exception")
       }

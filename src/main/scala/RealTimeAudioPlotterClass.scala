@@ -49,7 +49,7 @@ class RealTimeAudioPlotterClass(queue: LinkedBlockingQueue[Double]) extends Runn
   class PlotterTask extends TimerTask {
     override def run() = {
       //This should be converted to a thread
-      println("System time:" + System.currentTimeMillis())
+      //println("System time:" + System.currentTimeMillis())
       plotter(audioBatch.toList)
 
       try {
@@ -66,7 +66,7 @@ class RealTimeAudioPlotterClass(queue: LinkedBlockingQueue[Double]) extends Runn
       } catch {
         case ex: InterruptedException => println("Interrupted Exception")
       }
-      println("Completed_plotting")
+      //println("Completed_plotting")
     }
   }
 
